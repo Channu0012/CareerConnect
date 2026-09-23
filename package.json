@@ -1,0 +1,24 @@
+{
+  "name": "careerconnect-workspace",
+  "version": "1.0.0",
+  "description": "CareerConnect - Full-Stack MERN Recruitment Platform",
+  "scripts": {
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "seed": "npm run seed --prefix server",
+    "build": "npm run build --prefix client"
+  },
+  "keywords": [
+    "mern",
+    "mongodb",
+    "express",
+    "react",
+    "nodejs",
+    "recruitment"
+  ],
+  "author": "Student Developer",
+  "license": "ISC",
+  "devDependencies": {
+    "mongodb-memory-server": "^11.3.0"
+  }
+}
