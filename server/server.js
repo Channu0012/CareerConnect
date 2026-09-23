@@ -1,6 +1,6 @@
 // Server Entry Point
 const dotenv = require('dotenv');
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 const app = require('./app');
 
 // Load environment variables from .env file

@@ -1,4 +1,4 @@
-// Authentication Controller: Handles registration, login, and current user profile
+// Authentication Controller: Handles registration, login, and current user profile with NoSQL injection prevention
 const User = require('../models/User');
 const Candidate = require('../models/Candidate');
 const generateToken = require('../utils/generateToken');
@@ -8,17 +8,36 @@ const generateToken = require('../utils/generateToken');
 // @access  Public
 const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+
+    // Security: Validate inputs are primitive strings (prevents NoSQL object injections)
+    if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Invalid request format: Name, email, and password must be text strings' });
+    }
+
+    name = name.trim();
+    email = email.trim().toLowerCase();
 
     // Validate required fields
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please provide name, email, and password' });
     }
 
-    // Check if user already exists with this email
+    // Email format validation
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Please provide a valid email address' });
+    }
+
+    // Password length validation
+    if (password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters long' });
+    }
+
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists with this email address' });
+      return res.status(400).json({ message: 'An account with this email address already exists' });
     }
 
     // Disallow registering directly as admin from the public registration form
@@ -60,21 +79,28 @@ const registerUser = async (req, res, next) => {
 // @access  Public
 const loginUser = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    // Security: Validate inputs are primitive strings (prevents NoSQL injection such as { email: { $gt: "" } })
+    if (typeof email !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ message: 'Invalid credentials format' });
+    }
+
+    email = email.trim().toLowerCase();
 
     // Validate inputs
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide both email and password' });
     }
 
-    // Find user by email
+    // Find user by normalized email
     const user = await User.findOne({ email });
 
-    // Check password match
+    // Check password match using bcrypt
     if (user && (await user.matchPassword(password))) {
-      // Check if user is deactivated
+      // Check if user account is deactivated
       if (user.status === 'inactive') {
-        return res.status(403).json({ message: 'Account is deactivated. Please contact administrator.' });
+        return res.status(403).json({ message: 'Your account is deactivated. Please contact support.' });
       }
 
       res.json({
@@ -86,6 +112,7 @@ const loginUser = async (req, res, next) => {
         token: generateToken(user._id)
       });
     } else {
+      // Generic error response to prevent user enumeration attacks
       res.status(401).json({ message: 'Invalid email or password' });
     }
   } catch (error) {
@@ -119,10 +146,18 @@ const updateUserProfile = async (req, res, next) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    if (req.body.name && typeof req.body.name === 'string') {
+      user.name = req.body.name.trim();
+    }
 
-    if (req.body.password) {
+    if (req.body.email && typeof req.body.email === 'string') {
+      user.email = req.body.email.trim().toLowerCase();
+    }
+
+    if (req.body.password && typeof req.body.password === 'string') {
+      if (req.body.password.length < 6) {
+        return res.status(400).json({ message: 'Password must be at least 6 characters' });
+      }
       user.password = req.body.password;
     }
 
