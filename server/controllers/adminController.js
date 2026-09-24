@@ -4,6 +4,7 @@ const Job = require('../models/Job');
 const Application = require('../models/Application');
 const Company = require('../models/Company');
 const Candidate = require('../models/Candidate');
+const { escapeRegex } = require('../utils/sanitize');
 
 // @desc    Get global platform metrics & statistics
 // @route   GET /api/admin/stats
@@ -69,8 +70,11 @@ const getAllUsers = async (req, res, next) => {
     }
 
     if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
-      query.$or = [{ name: searchRegex }, { email: searchRegex }];
+      const sanitized = escapeRegex(req.query.search);
+      if (sanitized) {
+        const searchRegex = new RegExp(sanitized, 'i');
+        query.$or = [{ name: searchRegex }, { email: searchRegex }];
+      }
     }
 
     const users = await User.find(query).select('-password').sort({ createdAt: -1 });

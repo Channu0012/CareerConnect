@@ -9,8 +9,11 @@ const {
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+const { validateRegisterInput, validateLoginInput } = require('../validators/authValidator');
+const { rateLimiter } = require('../middleware/rateLimitMiddleware');
+
+router.post('/register', rateLimiter, validateRegisterInput, registerUser);
+router.post('/login', rateLimiter, validateLoginInput, loginUser);
 router.get('/me', protect, getCurrentUser);
 router.put('/profile', protect, updateUserProfile);
 

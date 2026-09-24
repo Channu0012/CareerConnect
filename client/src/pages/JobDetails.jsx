@@ -1,10 +1,11 @@
 // JobDetails Page: Comprehensive view of job specifications, company info, and application workflow
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import API from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import Modal from '../components/Modal';
 import Loader from '../components/Loader';
+import ApplicationTracker from '../components/ApplicationTracker';
 import {
   MapPin,
   Briefcase,
@@ -21,7 +22,6 @@ import {
 const JobDetails = () => {
   const { id } = useParams();
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +35,7 @@ const JobDetails = () => {
   const [applySuccess, setApplySuccess] = useState('');
   const [applyError, setApplyError] = useState('');
   const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [userApplication, setUserApplication] = useState(null);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -46,8 +47,11 @@ const JobDetails = () => {
         if (isAuthenticated && user?.role === 'candidate') {
           try {
             const appsRes = await API.get('/applications/my-applications');
-            const hasApplied = appsRes.data.some((app) => app.job?._id === id);
-            setAlreadyApplied(hasApplied);
+            const foundApp = appsRes.data.find((app) => app.job?._id === id);
+            if (foundApp) {
+              setAlreadyApplied(true);
+              setUserApplication(foundApp);
+            }
           } catch (appErr) {
             console.error('Could not verify past application status:', appErr);
           }
@@ -69,16 +73,19 @@ const JobDetails = () => {
     setApplySuccess('');
 
     try {
-      await API.post(`/applications/${id}`, {
+      const applyRes = await API.post(`/applications/${id}`, {
         coverLetter,
         resumeLink
       });
 
       setApplySuccess('Application submitted successfully! You can track its status in your candidate dashboard.');
       setAlreadyApplied(true);
+      if (applyRes.data) {
+        setUserApplication(applyRes.data);
+      }
       setTimeout(() => {
         setIsApplyModalOpen(false);
-      }, 2500);
+      }, 2000);
     } catch (err) {
       setApplyError(err.response?.data?.message || 'Failed to submit application. Please try again.');
     } finally {
@@ -86,7 +93,7 @@ const JobDetails = () => {
     }
   };
 
-  const formatSalary = (min, max, currency) => {
+  const formatSalary = (min, max) => {
     if (!min && !max) return 'Competitive compensation';
     const minLakhs = (min / 100000).toFixed(1);
     const maxLakhs = (max / 100000).toFixed(1);
@@ -122,6 +129,12 @@ const JobDetails = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '2rem', alignItems: 'start' }}>
           {/* Main Job Details Column */}
           <div>
+            {userApplication && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <ApplicationTracker application={userApplication} showJobDetails={false} />
+              </div>
+            )}
+
             <div className="card" style={{ marginBottom: '2rem' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
                 <div style={{ display: 'flex', gap: '1rem' }}>

@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const { getDbStatus } = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
-const { rateLimiter } = require('./middleware/rateLimitMiddleware');
 
 // Import Route Handlers
 const authRoutes = require('./routes/authRoutes');
@@ -64,7 +63,7 @@ app.use('/api', (req, res, next) => {
 });
 
 // Security: Rate limiting applied to authentication endpoints
-app.use('/api/auth', rateLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 
 // API Routes Mounting
 app.use('/api/jobs', jobRoutes);

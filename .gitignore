@@ -22,6 +22,12 @@ build/
 server/.env
 client/.env
 
+# Database & Storage
+data/
+server/data/
+*.sqlite
+*.db
+
 # Temporary & Log files
 npm-debug.log*
 yarn-debug.log*

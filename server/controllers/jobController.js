@@ -2,6 +2,7 @@
 const Job = require('../models/Job');
 const Company = require('../models/Company');
 const Application = require('../models/Application');
+const { escapeRegex } = require('../utils/sanitize');
 
 // @desc    Get all jobs with search, filters, and pagination
 // @route   GET /api/jobs
@@ -24,17 +25,23 @@ const getJobs = async (req, res, next) => {
 
     // Keyword search (searches title, description, or skills)
     if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
-      query.$or = [
-        { title: searchRegex },
-        { description: searchRegex },
-        { skills: { $in: [searchRegex] } }
-      ];
+      const sanitizedSearch = escapeRegex(req.query.search);
+      if (sanitizedSearch) {
+        const searchRegex = new RegExp(sanitizedSearch, 'i');
+        query.$or = [
+          { title: searchRegex },
+          { description: searchRegex },
+          { skills: { $in: [searchRegex] } }
+        ];
+      }
     }
 
     // Filter by location
     if (req.query.location) {
-      query.location = new RegExp(req.query.location, 'i');
+      const sanitizedLocation = escapeRegex(req.query.location);
+      if (sanitizedLocation) {
+        query.location = new RegExp(sanitizedLocation, 'i');
+      }
     }
 
     // Filter by employment type
@@ -175,6 +182,10 @@ const updateJob = async (req, res, next) => {
     if (req.body.skills && typeof req.body.skills === 'string') {
       req.body.skills = req.body.skills.split(',').map((s) => s.trim()).filter(Boolean);
     }
+
+    // Security Guard: Prevent caller from hijacking job ownership or manipulating counter
+    delete req.body.recruiter;
+    delete req.body.applicationsCount;
 
     const updatedJob = await Job.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

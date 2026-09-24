@@ -51,6 +51,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['candidate']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/candidate" element={<CandidateDashboard />} />
+              <Route path="/candidate/dashboard" element={<CandidateDashboard />} />
               <Route path="/candidate/applications" element={<MyApplications />} />
               <Route path="/candidate/profile" element={<CandidateProfile />} />
             </Route>
@@ -60,6 +61,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['recruiter', 'admin']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/recruiter" element={<RecruiterDashboard />} />
+              <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
               <Route path="/recruiter/jobs" element={<ManageJobs />} />
               <Route path="/recruiter/jobs/new" element={<JobForm />} />
               <Route path="/recruiter/jobs/:id/edit" element={<JobForm />} />
@@ -72,6 +74,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/admin/users" element={<ManageUsers />} />
               <Route path="/admin/companies" element={<ManageCompanies />} />
               <Route path="/admin/jobs" element={<ManageAllJobs />} />

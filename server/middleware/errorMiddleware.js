@@ -13,9 +13,20 @@ const errorHandler = (err, req, res, next) => {
   let message = err.message;
 
   // Handle Mongoose CastError (e.g. invalid MongoDB ObjectId)
-  if (err.name === 'CastError' && err.kind === 'ObjectId') {
+  if (err.name === 'CastError') {
     statusCode = 404;
     message = 'Resource not found with the specified ID';
+  }
+
+  // Handle JWT errors if passed to next(err)
+  if (err.name === 'JsonWebTokenError') {
+    statusCode = 401;
+    message = 'Invalid token, authorization denied';
+  }
+
+  if (err.name === 'TokenExpiredError') {
+    statusCode = 401;
+    message = 'Token has expired, please log in again';
   }
 
   // Handle Mongoose duplicate key error (code 11000)

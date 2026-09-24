@@ -1,10 +1,8 @@
-// Server Entry Point
-const dotenv = require('dotenv');
+// Load environment variables first before importing modules that depend on them
+require('dotenv').config();
+
 const { connectDB } = require('./config/db');
 const app = require('./app');
-
-// Load environment variables from .env file
-dotenv.config();
 
 // Connect to MongoDB Database
 connectDB();

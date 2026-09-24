@@ -72,11 +72,14 @@ const updateCompany = async (req, res, next) => {
 
     // Check ownership if not admin
     if (
+      company.createdBy &&
       company.createdBy.toString() !== req.user._id.toString() &&
       req.user.role !== 'admin'
     ) {
       return res.status(403).json({ message: 'Not authorized to update this company' });
     }
+
+    delete req.body.createdBy;
 
     const updated = await Company.findByIdAndUpdate(req.params.id, req.body, {
       new: true,

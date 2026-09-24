@@ -9,12 +9,10 @@ import {
   User,
   Mail,
   Phone,
-  MapPin,
   Globe,
   Save,
   CheckCircle,
   AlertCircle,
-  FileText,
   Calendar
 } from 'lucide-react';
 

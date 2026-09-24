@@ -31,7 +31,7 @@ const DashboardLayout = () => {
                 className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
               >
                 <LayoutDashboard size={18} />
-                <span>Overview</span>
+                <span>Dashboard</span>
               </NavLink>
 
               <NavLink
@@ -107,7 +107,7 @@ const DashboardLayout = () => {
                 className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
               >
                 <LayoutDashboard size={18} />
-                <span>Admin Overview</span>
+                <span>Dashboard</span>
               </NavLink>
 
               <NavLink

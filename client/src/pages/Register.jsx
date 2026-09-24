@@ -1,8 +1,7 @@
-// Register Page: Registration portal for Candidates and Recruiters
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Briefcase, Lock, Mail, User, AlertCircle, CheckCircle } from 'lucide-react';
+import { Lock, Mail, User, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
   const [role, setRole] = useState('candidate');
@@ -10,11 +9,22 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { register } = useAuth();
+  const { register, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect immediately to role dashboard
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'admin') navigate('/admin', { replace: true });
+      else if (user.role === 'recruiter') navigate('/recruiter', { replace: true });
+      else navigate('/candidate', { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +49,11 @@ const Register = () => {
         navigate('/candidate');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please check your details.');
+      if (!err.response) {
+        setError('Cannot connect to server. Please ensure the backend is running on http://localhost:5000');
+      } else {
+        setError(err.response?.data?.message || 'Registration failed. Please check your details.');
+      }
     } finally {
       setLoading(false);
     }
@@ -50,21 +64,19 @@ const Register = () => {
       <div className="container" style={{ maxWidth: '520px' }}>
         <div className="card" style={{ padding: '2.25rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-            <div
+            <img
+              src="/logo.png"
+              alt="CareerConnect Logo"
               style={{
-                width: '50px',
-                height: '50px',
-                background: 'linear-gradient(135deg, var(--primary), var(--accent))',
-                borderRadius: 'var(--radius-md)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                marginBottom: '0.75rem'
+                width: '58px',
+                height: '58px',
+                borderRadius: '15px',
+                objectFit: 'cover',
+                marginBottom: '0.75rem',
+                boxShadow: '0 8px 24px -4px rgba(37, 99, 235, 0.3)',
+                display: 'inline-block'
               }}
-            >
-              <Briefcase size={26} />
-            </div>
+            />
             <h1 style={{ fontSize: '1.6rem', marginBottom: '0.25rem' }}>Create Your Account</h1>
             <p style={{ color: 'var(--gray-500)', fontSize: '0.9rem' }}>
               Join CareerConnect to browse jobs or hire top tech professionals
@@ -178,14 +190,37 @@ const Register = () => {
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
                 />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   className="form-control"
                   placeholder="At least 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{ paddingLeft: '2.4rem' }}
+                  style={{ paddingLeft: '2.4rem', paddingRight: '2.5rem' }}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: showPassword ? 'var(--primary)' : 'var(--gray-400)',
+                    transition: 'color 0.15s ease'
+                  }}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 
@@ -198,14 +233,37 @@ const Register = () => {
                   style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
                 />
                 <input
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   className="form-control"
                   placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{ paddingLeft: '2.4rem' }}
+                  style={{ paddingLeft: '2.4rem', paddingRight: '2.5rem' }}
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '2px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: showConfirmPassword ? 'var(--primary)' : 'var(--gray-400)',
+                    transition: 'color 0.15s ease'
+                  }}
+                  title={showConfirmPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
               </div>
             </div>
 

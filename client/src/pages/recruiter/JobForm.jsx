@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import API from '../../services/api';
 import Loader from '../../components/Loader';
-import { Briefcase, ArrowLeft, Save, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 
 const JobForm = () => {
   const { id } = useParams();
@@ -56,6 +56,7 @@ const JobForm = () => {
           setFormData((prev) => ({ ...prev, company: compRes.data[0]._id }));
         }
       } catch (err) {
+        console.error('Job form initialization error:', err);
         setError('Failed to load data for form initialization');
       } finally {
         setLoading(false);

@@ -110,7 +110,7 @@ const getJobApplications = async (req, res, next) => {
     // Fetch matching candidate profile details (skills, experience, headline)
     const detailedApplications = await Promise.all(
       applications.map(async (app) => {
-        const profile = await Candidate.findOne({ user: app.candidate._id });
+        const profile = app.candidate ? await Candidate.findOne({ user: app.candidate._id }) : null;
         return {
           ...app.toObject(),
           candidateProfile: profile || null
@@ -141,8 +141,13 @@ const updateApplicationStatus = async (req, res, next) => {
       return res.status(404).json({ message: 'Application not found' });
     }
 
+    if (!application.job) {
+      return res.status(404).json({ message: 'Associated job posting no longer exists' });
+    }
+
     // Security Ownership Check: Ensure the recruiter owns the job associated with this application
     if (
+      application.job.recruiter &&
       application.job.recruiter.toString() !== req.user._id.toString() &&
       req.user.role !== 'admin'
     ) {

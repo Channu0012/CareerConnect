@@ -2,10 +2,10 @@
 const loginAttempts = new Map();
 
 const rateLimiter = (req, res, next) => {
-  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  const ip = req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15-minute sliding window
-  const maxAttempts = 10; // Max 10 attempts per 15 mins
+  const maxAttempts = 60; // Max 60 attempts per 15 mins for login/register
 
   if (!loginAttempts.has(ip)) {
     loginAttempts.set(ip, []);

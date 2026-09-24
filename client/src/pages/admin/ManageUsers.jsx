@@ -4,7 +4,7 @@ import API from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import Loader from '../../components/Loader';
 import Modal from '../../components/Modal';
-import { Search, Filter, Trash2, Power, AlertCircle, CheckCircle, Shield } from 'lucide-react';
+import { Search, Filter, Trash2, Power, AlertCircle, CheckCircle } from 'lucide-react';
 
 const ManageUsers = () => {
   const { user: currentAdmin } = useAuth();
